@@ -6,8 +6,6 @@ au FileType xml setlocal equalprg=xmllint\ --format\ --recover\ -\ 2>/dev/null
 set clipboard=unnamed
 set hlsearch
 highlight LineNr guifg=#050505
-hi Cursor guibg=pink
-
 
 syntax on
 
