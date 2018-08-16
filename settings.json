@@ -1,4 +1,5 @@
 {
+ {
     "git.ignoreMissingGitWarning": true,
     "workbench.statusBar.visible": true,
     "window.menuBarVisibility": "visible",
@@ -14,8 +15,15 @@
     "window.smoothScrollingWorkaround": true,
     "csharp.format.enable": true,
     "csharpfixformat.style.enabled": true,
-    "csharpfixformat.style.braces.allowInlines": false,
+    "csharpfixformat.style.braces.allowInlines": true,
     "csharpfixformat.sort.usings.splitGroups": true,
     "csharpfixformat.style.braces.onSameLine": false,
-    
+
+    "vim.normalModeKeyBindingsNonRecursive": [
+    {
+      "before": ["<Enter>"],
+      "after": ["o","<Esc>","k"]
+    }
+]
+}
 }
