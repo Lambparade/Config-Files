@@ -1,0 +1,21 @@
+{
+    "git.ignoreMissingGitWarning": true,
+    "workbench.statusBar.visible": true,
+    "window.menuBarVisibility": "visible",
+    "workbench.iconTheme": "material-icon-theme",
+    "workbench.colorTheme": "Dracula At Night",
+    "window.titleBarStyle": "custom",
+    "vim.hlsearch": true,
+    "vim.useSystemClipboard": true,
+    "editor.cursorStyle": "block-outline",
+    "workbench.editor.enablePreview": false,
+    "editor.minimap.enabled": false,
+    "window.restoreFullscreen": true,
+    "window.smoothScrollingWorkaround": true,
+    "csharp.format.enable": true,
+    "csharpfixformat.style.enabled": true,
+    "csharpfixformat.style.braces.allowInlines": false,
+    "csharpfixformat.sort.usings.splitGroups": true,
+    "csharpfixformat.style.braces.onSameLine": false,
+    
+}
