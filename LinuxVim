@@ -1,0 +1,30 @@
+set clipboard=unnamedplus
+
+colorscheme murphy
+set belloff=all
+
+set number
+syntax on
+
+map <Space> :noh<CR>
+nmap <CR> o<Esc>k
+nmap <C-@> :set nonu<CR>
+
+
+nnoremap  <C-d> :execute "$normal! 1o------------"<Esc>o<Esc>o{}<Esc>o<Esc>o()<Esc>o<Esc>o------------<Esc>o<Esc>?{<CR>a
+
+function RangerExplorer()
+    exec "silent !ranger --choosefile=/tmp/vim_ranger_current_file " . expand("%:p:h")
+    if filereadable('/tmp/vim_ranger_current_file')
+        exec 'edit ' . system('cat /tmp/vim_ranger_current_file')
+        call system('rm /tmp/vim_ranger_current_file')
+    endif
+    redraw!
+endfunction
+function OpenNewFileRanger()
+               :vsplit
+               :call RangerExplorer()
+endfunction
+
+map X :exec OpenNewFileRanger() <CR>
+

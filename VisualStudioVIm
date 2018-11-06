@@ -1,0 +1,17 @@
+
+au FileType xml setlocal equalprg=xmllint\ --format\ --recover\ -\ 2>/dev/null
+
+set clipboard=unnamed
+set hlsearch
+highlight LineNr guifg=#050505
+syntax on
+set belloff=all
+set noeb vb t_vb=
+set vb t_vb=
+vmap <C-c> "*y
+vmap <C-w> ve
+nmap <CR> o<Esc>k
+nnoremap <F3> :set hlsearch!<CR>
+map <Space> :noh<CR>
+"map <C-9> norm:magg=G`a
+map <1> norm:magg=G`a
