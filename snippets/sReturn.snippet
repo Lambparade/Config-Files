@@ -1,0 +1,50 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<CodeSnippets  xmlns="http://schemas.microsoft.com/VisualStudio/2005/CodeSnippet">
+	<CodeSnippet Format="1.0.0">
+		<Header>
+			<Title>Return</Title>
+			<Shortcut>sr</Shortcut>
+			<Description>Code snippet for 'void Main' method</Description>
+			<Author>Microsoft Corporation</Author>
+			<SnippetTypes>
+				<SnippetType>Expansion</SnippetType>
+			</SnippetTypes>
+		</Header>
+		<Snippet>
+			<Declarations>
+				<Literal>
+					<ID>accsess</ID>
+					<Default>accsess</Default>
+					<ToolTip>name</ToolTip>
+				</Literal>
+				<Literal>
+					<ID>MethodName</ID>
+					<Default>Methodname</Default>
+					<ToolTip>name</ToolTip>
+				</Literal>
+				<Literal>
+					<ID>return</ID>
+					<Default>returntype</Default>
+					<ToolTip>name</ToolTip>
+				</Literal>
+				<Literal>
+					<ID>value</ID>
+					<Default>returnValue</Default>
+					<ToolTip>name</ToolTip>
+				</Literal>
+				<Literal>
+					<ID>init</ID>
+					<Default>init</Default>
+					<ToolTip>name</ToolTip>
+				</Literal>
+			</Declarations>
+			<Code Language="csharp">
+				<![CDATA[$accsess$ $return$ $MethodName$($end$)
+{
+		$return$ $value$ = $init$
+		return $value$;
+}]]>
+			</Code>
+		</Snippet>
+	</CodeSnippet>
+</CodeSnippets>
