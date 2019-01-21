@@ -1,10 +1,8 @@
 {
- {
     "git.ignoreMissingGitWarning": true,
     "workbench.statusBar.visible": true,
-    "window.menuBarVisibility": "visible",
+    "window.menuBarVisibility": "hidden",
     "workbench.iconTheme": "material-icon-theme",
-    "workbench.colorTheme": "Dracula At Night",
     "window.titleBarStyle": "custom",
     "vim.hlsearch": true,
     "vim.useSystemClipboard": true,
@@ -23,7 +21,20 @@
     {
       "before": ["<Enter>"],
       "after": ["o","<Esc>","k"]
+    },
+    {
+      "before": ["Space"],
+      "commands": [":noh"]
     }
-]
-}
+],
+"git.countBadge": "off",
+"powermode.enabled": false,
+"open-in-vim.openMethod": "gvim",
+"window.zoomLevel": 1,
+"workbench.sideBar.location": "left",
+"git.autofetch": true,
+"javascript.format.placeOpenBraceOnNewLineForControlBlocks": true,
+"javascript.format.placeOpenBraceOnNewLineForFunctions": true,
+"git.enableSmartCommit": true,
+"workbench.colorTheme": "Dracula At Night"
 }
