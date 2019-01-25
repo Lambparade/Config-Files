@@ -95,12 +95,20 @@ alias l='ls -CF'
 alias lr='cd /home/force;source ranger'
 alias wr='cd /mnt;source ranger'
 alias br='cd /home/force;vim .bashrc'
+alias sbr='source .bashrc'
 alias pi='cd /mnt/c/Develop/Pilot/Pilot_1.16/Pilot_1.16_CUSTOMER'
 alias sb='cd /home/force;source .bashrc'
-alias rr='source ranger'
-alias ls='ls -a'
 alias fc='cd /mnt/c/Users/robinson/Documents/ConsoleFlashCards/bin/Debug/netcoreapp2.0;dotnet ./NetCore.dll'
+alias rr='source ranger'
+alias up='sudo apt-get update'
+alias ls='ls -a'
+alias yd='youtube-dl'
 alias c='code .'
+alias :q='exit'
+alias ping='ping -c 5'
+alias m='ssh swag@97.107.85.121'
+
+alias SendHome='cd /home/force/;zip -r Transport.zip Transport;scp /home/force/Transport.zip swag@97.107.85.121:/home/swag/Transport;rm -f Transport.zip'
 
 
 # Add an "alert" alias for long running commands.  Use like so:
