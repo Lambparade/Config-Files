@@ -108,7 +108,7 @@ alias :q='exit'
 alias ping='ping -c 5'
 alias m='ssh swag@97.107.85.121'
 
-alias SendHome='cd /home/force/;zip -r Transport.zip Transport;scp /home/force/Transport.zip swag@97.107.85.121:/home/swag/Transport;rm -f Transport.zip'
+alias sh='cd /home/force/;zip -r Transport.zip Transport;scp /home/force/Transport.zip swag@97.107.85.121:/home/swag/Transport;rm -f Transport.zip'
 
 
 # Add an "alert" alias for long running commands.  Use like so:
