@@ -13,6 +13,8 @@ nmap <C-@> :set nonu<CR>
 
 nnoremap  <C-d> :execute "$normal! 1o------------"<Esc>o<Esc>o{}<Esc>o<Esc>o()<Esc>o<Esc>o------------<Esc>o<Esc>?{<CR>a
 
+nnoremap  <C-p> :execute "$normal! 1"<Esc>o[]**********************<Esc>o[]**********************<Esc>?[<CR>na
+
 function RangerExplorer()
     exec "silent !ranger --choosefile=/tmp/vim_ranger_current_file " . expand("%:p:h")
     if filereadable('/tmp/vim_ranger_current_file')
