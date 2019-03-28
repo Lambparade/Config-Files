@@ -109,6 +109,7 @@ alias c='code .'
 
 # WebAlaises
 alias wk='xdg-open https://10fastfingers.com/typing-test/english &'
+alias gituser='xdg-open https://github.com/Lambparade'
 # WebAlaises
 
 # Computer Info
