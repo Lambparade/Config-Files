@@ -179,8 +179,7 @@ bar {
 # https://github.com/Airblader/i3/tree/gaps-next
 # Archlinux via aur installation
 # http://dotx.me/snippets-i3-gaps/
-# delete or uncomment the following lines if you do not have it or do not
-# want it
+ want it
 # packer i3-gaps-next-git --noedit
 
 for_window [class="^.*"] border pixel 5
