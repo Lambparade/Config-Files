@@ -3,8 +3,11 @@
 # Should you change your keyboard layout some time, delete
 # this file and re-run i3-config-wizard(1).
 
+##############################SET BACKGROUND AND MAKE TERMINAL TRANSPARENT
+#exec --no-startup-id feh --bg-fill -z /home/taoy/Pictures/Wall/*.jpg
+#exec --no-startup-id compton -bCG3 config file (v4)
+##############################SET BACKGROUND AND MAKE TERMINAL TRANSPARENT
 
-# i3 config file (v4)
 #
 # Please see https://i3wm.org/docs/userguide.html for a complete reference!
 
