@@ -100,6 +100,7 @@ alias up='sudo apt-get update'
 alias br='cd /home/swag;vim .bashrc'
 alias sbr='cd /home/swag;source .bashrc'
 alias ping='ping -c 5'
+alias yd='youtube-dl -x --audio-format mp3' 
 alias :q='exit'
 alias uzt='cd /home/swag/Transport;unzip Transport.zip'
 alias f='firefox &'
@@ -120,6 +121,7 @@ alias cpuinfo='screenfetch'
 alias i3='cd /home/swag/.config/i3;vim config'
 # i3 Config
 
+alias filesize='du -sh'
 # Wifi
 alias wifi='nmtui'
 # Wifi
@@ -128,10 +130,6 @@ alias wifi='nmtui'
 alias wp='nitrogen'
 alias trans='compton &'
 # Wallpaper
-
-# Download Utils
-alias yd='youtube-dl -x --audio-format mp3' 
-# Download Utils
 
 # Add an "alert" alias for long running commands.  Use like so:
 #   sleep 10; alert
