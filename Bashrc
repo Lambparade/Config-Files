@@ -106,6 +106,10 @@ alias uzt='cd /home/swag/Transport;unzip Transport.zip'
 alias f='firefox &'
 alias c='code .'
 
+# Navagation
+alias gu='cd /home/swag/Documents'
+alias gituser='xdg-open https://github.com/Lambparade'
+# WebAlaises
 
 # WebAlaises
 alias wk='xdg-open https://10fastfingers.com/typing-test/english &'
