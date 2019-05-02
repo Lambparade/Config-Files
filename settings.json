@@ -36,5 +36,4 @@
 "javascript.format.placeOpenBraceOnNewLineForControlBlocks": true,
 "javascript.format.placeOpenBraceOnNewLineForFunctions": true,
 "git.enableSmartCommit": true,
-"workbench.colorTheme": "Dracula At Night"
 }
