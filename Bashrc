@@ -105,10 +105,12 @@ alias :q='exit'
 alias uzt='cd /home/swag/Transport;unzip Transport.zip'
 alias f='firefox &'
 alias c='code .'
+alias hm='ssh tashe@lambparade.com'
 
 # Navagation
 alias gu='cd /home/swag/Documents'
 alias gituser='xdg-open https://github.com/Lambparade'
+alias ..='cd ..'
 # WebAlaises
 
 # WebAlaises
