@@ -6,6 +6,7 @@
 ##############################SET BACKGROUND AND MAKE TERMINAL TRANSPARENT
 #exec --no-startup-id feh --bg-fill -z /home/taoy/Pictures/Wall/*.jpg
 #exec --no-startup-id compton -bCG3 config file (v4)
+# this is good.
 ##############################SET BACKGROUND AND MAKE TERMINAL TRANSPARENT
 
 #
