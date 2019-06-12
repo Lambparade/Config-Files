@@ -1,11 +1,6 @@
 # ~WebDev/.bashrc: executed by bash(1) for non-login shells.
 # see /usr/share/doc/bash/examples/startup-files (in the package bash-doc)
-<<<<<<< HEAD
-# If not running interactively, don't do anything
-shopt -s autocd
-=======
 # for examples
->>>>>>> d414907e5fb5085cbf5a0bb62b394141ca42407e
 
 # If not running interactively, don't do anything
 case $- in
@@ -129,6 +124,7 @@ alias cpuinfo='screenfetch'
 
 # i3 Config
 alias i3='cd /home/swag/.config/i3;vim config'
+alias i3duel='xrandr --output VGA1 --auto --left-of LVDS1'
 # i3 Config
 
 alias filesize='du -sh'
@@ -140,6 +136,11 @@ alias wifi='nmtui'
 alias wp='nitrogen'
 alias trans='compton &'
 # Wallpaper
+
+# ServiceUtil
+alias slist='service --status-all'
+# ServiceUtil
+
 
 # Add an "alert" alias for long running commands.  Use like so:
 #   sleep 10; alert
