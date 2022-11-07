@@ -1,0 +1,39 @@
+{
+    "git.ignoreMissingGitWarning": true,
+    "workbench.statusBar.visible": true,
+    "window.menuBarVisibility": "hidden",
+    "workbench.iconTheme": "material-icon-theme",
+    "window.titleBarStyle": "custom",
+    "vim.hlsearch": true,
+    "vim.useSystemClipboard": true,
+    "editor.cursorStyle": "block-outline",
+    "workbench.editor.enablePreview": false,
+    "editor.minimap.enabled": false,
+    "window.restoreFullscreen": true,
+    "window.smoothScrollingWorkaround": true,
+    "csharp.format.enable": true,
+    "csharpfixformat.style.enabled": true,
+    "csharpfixformat.style.braces.allowInlines": true,
+    "csharpfixformat.sort.usings.splitGroups": true,
+    "csharpfixformat.style.braces.onSameLine": false,
+
+    "vim.normalModeKeyBindingsNonRecursive": [
+    {
+      "before": ["<Enter>"],
+      "after": ["o","<Esc>","k"]
+    },
+    {
+      "before": ["Space"],
+      "commands": [":noh"]
+    }
+],
+"git.countBadge": "off",
+"powermode.enabled": false,
+"open-in-vim.openMethod": "gvim",
+"window.zoomLevel": 1,
+"workbench.sideBar.location": "left",
+"git.autofetch": true,
+"javascript.format.placeOpenBraceOnNewLineForControlBlocks": true,
+"javascript.format.placeOpenBraceOnNewLineForFunctions": true,
+"git.enableSmartCommit": true,
+}

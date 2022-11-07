@@ -1,0 +1,1706 @@
+﻿<?xml version="1.0" encoding="UTF-8"?>
+
+<project name="»pilot 3.0«" basedir="." default="all-compile">
+
+  <tstamp/>
+
+
+  <property file="${basedir}/build.properties"/>
+  <property file="${basedir}/build.default.properties"/>
+
+  <property name="build.action" value="build"/>
+  <property name="build.configuration" value="Debug"/>
+  <property name="dist.dir" location="Output"/>
+
+  <property name="build.failondeletecache" value="true"/>
+  <property name="modules.failonerror" value="true"/>
+  <property name="services.failonerror" value="true"/>
+
+  <property name="devenv.env.DEVENV_DEPLOY" value="false"/>
+  <property name="devenv.deletereferences" value="true"/>
+
+  <property name="translate.locales" value="de,en"/>
+  <property name="translate.fallback" value="en"/>
+  <property name="translate.reference" value="de"/>
+  <property name="translate.depends" value="true"/>
+  <property name="translate.failonfallback" value="true"/>
+  <property name="translate.package.depends" value="true"/>
+
+  <property name="translate.update.merge" value="true"/>
+  <property name="translate.update.reference" value="de"/>
+  <property name="translate.update.test" value="false"/>
+  <property name="translate.update.validate" location="Sys/Cfg/html/zoller.dtd"/>
+  <property name="translate.update.verbose" value="false"/>
+
+  <property name="changelog.tag" value="HEAD"/>
+  <property name="changelog.xsl.file" location="${ant.home}/etc/changelog.xsl"/>
+  <property name="changelog.end" value="${TODAY}"/>
+
+  <property name="todo.xsl.file" location="h:/usr/local/share/xsl/todo.xsl"/>
+
+  <property name="ndoc.dir" location="C:/Program Files/NDoc 1.3/bin/net/ndoc-e-bin-v1"/>
+  <property name="ndoc.documenter" value="VS.NET_2003"/>
+  <property name="ndoc.output.dir" location="ndoc-doc"/>
+
+  <property name="cvs.file" location="h:/usr/bin/cvs-1.11.2.exe"/>
+
+  <taskdef name="copyupdate" classname="com.zoller_d.tools.ant.CopyUpdate"/>
+  <taskdef name="devenv" classname="com.zoller_d.tools.ant.DevEnv"/>
+  <taskdef name="fileindex" classname="com.zoller_d.tools.ant.FileIndex"/>
+  <taskdef name="groovy" classname="org.codehaus.groovy.ant.Groovy"/>
+  <taskdef name="interactive" classname="com.zoller_d.tools.ant.Interactive"/>
+  <taskdef name="ndoc" classname="com.zoller_d.tools.ant.NDoc"/>
+  <taskdef name="propertycopy" classname="net.sf.antcontrib.property.PropertyCopy"/>
+  <taskdef name="todo" classname="com.zoller_d.tools.ant.ToDo"/>
+  <taskdef name="zstranslate" classname="com.zoller_d.tools.ant.Translate"/>
+
+  <!--
+    Remapps all needed dist.translate.* properties to translate.*
+  -->
+  <propertycopy name="translate.locales" from="dist.translate.locales" silent="true"/>
+  <propertycopy name="translate.fallback" from="dist.translate.fallback" silent="true"/>
+  <propertycopy name="translate.reference" from="dist.translate.reference" silent="true"/>
+
+  <!--
+       =========================================================================
+           Patternsets and vice versa.
+       =========================================================================
+  -->
+  <patternset id="assembly.info.pattern">
+    <include name="**/AssemblyInfo.cs"/>
+    <!--<include name="**/AssemblyInfo.cpp"/>-->
+    <exclude name="DbFieldManager/"/>
+    <exclude name="DbQuery/"/>
+  </patternset>
+
+  <patternset id="assembly.info.pattern2">
+    <include name="**/AssemblyInfo.cpp"/>
+    <exclude name="DbFieldManager/"/>
+    <exclude name="DbQuery/"/>
+  </patternset>
+
+  <!--
+       =========================================================================
+           Initialization
+       =========================================================================
+  -->
+  <target name="init">
+    <available file="Interface" type="dir" property="folder.interface.present"/>
+  </target>
+
+  <!--
+       =========================================================================
+           Building
+       =========================================================================
+  -->
+  <target name="sys" depends="init,zedgraph,drawing,shared,prebuild">
+    <devenv action="${build.action}" configuration="${build.configuration}"
+            failondeletecache="${build.failondeletecache}"
+            deletereferences="false">
+      <fileset dir="Sys" includes="**/*.sln"/>
+    </devenv>
+  </target>
+
+  <target name="std-post-processor" depends="sys">
+    <devenv action="${build.action}" configuration="${build.configuration}"
+            failondeletecache="${build.failondeletecache}">
+      <fileset dir="Dnc/StandardFormatter" includes="*.sln">
+        <custom classname="com.zoller_d.tools.ant.selectors.PropertySelector">
+          <param name="casesensitive" value="false"/>
+          <param name="prefix" value="build"/>
+          <param name="unless" value="build.all"/>
+        </custom>
+      </fileset>
+    </devenv>
+  </target>
+
+  <target name="formatgenerator" depends="sys">
+    <devenv action="${build.action}" configuration="${build.configuration}"
+            failondeletecache="${build.failondeletecache}">
+      <fileset dir="Dnc/FormatGenerator" includes="*.sln">
+        <custom classname="com.zoller_d.tools.ant.selectors.PropertySelector">
+          <param name="casesensitive" value="false"/>
+          <param name="prefix" value="build"/>
+          <param name="unless" value="build.all"/>
+        </custom>
+      </fileset>
+    </devenv>
+  </target>
+
+  <target name="std-parser" depends="sys, process">
+    <devenv action="${build.action}" configuration="${build.configuration}"
+            failondeletecache="${build.failondeletecache}">
+      <fileset dir="Dnc/StandardParser" includes="*.sln">
+        <custom classname="com.zoller_d.tools.ant.selectors.PropertySelector">
+          <param name="casesensitive" value="false"/>
+          <param name="prefix" value="build"/>
+          <param name="unless" value="build.all"/>
+        </custom>
+      </fileset>
+    </devenv>
+  </target>
+
+  <target name="post-processor" depends="std-post-processor, formatgenerator">
+    <devenv action="${build.action}" configuration="${build.configuration}"
+            failondeletecache="${build.failondeletecache}">
+      <fileset dir="Dnc/Formatter" includes="**/*.sln">
+        <custom classname="com.zoller_d.tools.ant.selectors.PropertySelector">
+          <param name="casesensitive" value="false"/>
+          <param name="prefix" value="build"/>
+          <param name="unless" value="build.all"/>
+        </custom>
+      </fileset>
+    </devenv>
+  </target>
+
+  <target name="parser" depends="std-parser">
+    <devenv action="${build.action}" configuration="${build.configuration}"
+            failondeletecache="${build.failondeletecache}">
+      <fileset dir="Dnc/Parser" includes="**/*.sln">
+        <custom classname="com.zoller_d.tools.ant.selectors.PropertySelector">
+          <param name="casesensitive" value="false"/>
+          <param name="prefix" value="build"/>
+          <param name="unless" value="build.all"/>
+        </custom>
+      </fileset>
+    </devenv>
+  </target>
+
+  <target name="reports" depends="sys">
+    <devenv action="${build.action}" configuration="${build.configuration}"
+            failondeletecache="${build.failondeletecache}">
+      <fileset dir="Report" includes="**/*.sln">
+        <custom classname="com.zoller_d.tools.ant.selectors.PropertySelector">
+          <param name="casesensitive" value="false"/>
+          <param name="prefix" value="build"/>
+          <param name="unless" value="build.all"/>
+        </custom>
+      </fileset>
+    </devenv>
+  </target>
+  
+  <target name="dnc" depends="std-post-processor, std-parser, post-processor, parser">
+
+  </target>
+
+  <target name="shared" depends="init">
+    <devenv action="${build.action}" configuration="${build.configuration}"
+            failondeletecache="${build.failondeletecache}">
+      <fileset dir="Shared" includes="**/*.sln">
+        <custom classname="com.zoller_d.tools.ant.selectors.PropertySelector">
+          <param name="casesensitive" value="false"/>
+          <param name="prefix" value="build"/>
+          <param name="unless" value="build.all"/>
+        </custom>
+      </fileset>
+    </devenv>
+  </target>
+
+  <target name="prebuild">
+    <fail unless="build.platform" message="Undefined property build.platform"/>
+    
+    <echo message="Build platform: ${build.platform}"/>
+    
+    <!-- copy OCCT dependent on x86 + x64 -->
+    <echo message="Deploying OCCT ${build.platform}..."/>
+    <copy todir="${dist.dir}/AppFramework/OCCT" overwrite="true" preservelastmodified="true">
+      <fileset dir="3rdParty/OpenCascade/${build.platform}">
+        <include name="/"/>
+      </fileset>
+    </copy>
+    
+    <echo message="Deploying SlimDX ${build.platform}..."/>
+    <copy todir="${dist.dir}/Process" overwrite="true" preservelastmodified="true">
+      <fileset dir="3rdParty/SlimDX/${build.platform}">
+        <include name="/"/>
+      </fileset>
+    </copy>
+    
+    <echo message="Deploying LMI-Dlls ${build.platform}..."/>
+    <delete dir="${dist.dir}/Hardware/LMI"/>
+    <copy todir="${dist.dir}/Hardware/LMI" overwrite="true" preservelastmodified="true">
+      <fileset dir="3rdParty/Hardware/LMI/${build.platform}">
+        <include name="/"/>
+      </fileset>
+    </copy>
+  
+    <echo message="Deploying MicroEpsilon-Dlls ${build.platform}..."/>
+    <delete dir="${dist.dir}/Hardware/MicroEpsilon"/>
+    <copy todir="${dist.dir}/Hardware/MicroEpsilon" overwrite="true" preservelastmodified="true">
+      <fileset dir="3rdParty/Hardware/MicroEpsilon/${build.platform}">
+        <include name="/"/>
+      </fileset>
+    </copy>
+  
+   <!--(mm) workaround fuer smartray dlls. Datei muss nach bin/debug kopiert und bei x64 umbenannt werden. Mangels if werden beide kopiert.-->
+    <echo message="Deploying Smartray-Dlls ${build.platform}..."/>
+    <copy file="3rdParty/Hardware/Smartray/${build.platform}/SRAPI_CSharp-x64.dll" tofile="AppFramework/AppFrameworkBase/SRAPI_CSharp.dll" failonerror="false" quiet="true" overwrite="true" preservelastmodified="true"/>
+    <copy file="3rdParty/Hardware/Smartray/${build.platform}/SRAPI_CSharp.dll" tofile="AppFramework/AppFrameworkBase/SRAPI_CSharp.dll" failonerror="false" quiet="true" overwrite="true" preservelastmodified="true"/>
+    <delete dir="${dist.dir}/Hardware/Smartray"/>
+    <copy todir="${dist.dir}/Hardware/Smartray" overwrite="true" preservelastmodified="true">
+      <fileset dir="3rdParty/Hardware/Smartray/${build.platform}">
+        <include name="/"/>
+      </fileset>
+    </copy>
+  
+    <!-- copy roughness libraries -->  
+    <echo message="Deploying Seewig-Dlls ${build.platform}..."/>
+    <delete dir="${dist.dir}/AppFramework/Seewig/"/>
+    <delete dir="${dist.dir}/AppFramework/Roughness/"/>
+    <copy todir="${dist.dir}/AppFramework/Roughness/" overwrite="true" preservelastmodified="true">
+      <fileset dir="3rdParty/Roughness/${build.platform}">
+        <include name="/"/>
+      </fileset>
+    </copy>
+    
+    <!-- copy native halcon libraries -->
+    <echo message="Deploying Halcon-Dlls ${build.platform}..."/>
+    <copy file="3rdParty/Halcon/${build.platform}/halcondotnet.dll" todir="${dist.dir}/Vc" overwrite="true" preservelastmodified="true"/>
+    <copy file="3rdParty/Halcon/${build.platform}/halcon.dll" todir="${dist.dir}/Vc" overwrite="true" preservelastmodified="true"/>
+    <copy file="3rdParty/Halcon/${build.platform}/hAcqheliCamC3.dll" todir="${dist.dir}/Vc" overwrite="true" preservelastmodified="true"/>
+    <copy file="3rdParty/Halcon/${build.platform}/halcon.dll" todir="Vc/Halcon/halcon/ASL" overwrite="true" preservelastmodified="true"/>
+    
+    <!-- copy native iowarrior libraries -->
+    <echo message="Deploying IOWarrior-Dlls ${build.platform}..."/>
+    <copy todir="${dist.dir}/Hardware" overwrite="true" preservelastmodified="true">
+      <fileset dir="3rdParty/Hardware/IOWarrior/${build.platform}/"/>
+    </copy>
+    
+    <!-- copy CInterface.dll -->
+    <echo message="Deploying CInterface-Dlls ${build.platform}..."/>
+    <copy file="3rdParty/Pilot/${build.platform}/CInterface.dll" todir="${dist.dir}" overwrite="true" preservelastmodified="true"/>
+     
+    <!-- copy native ZUB libraries -->
+    <echo message="Deploying ZUB-Dlls ${build.platform}..."/>
+    <copy todir="${dist.dir}/Hardware" overwrite="true" preservelastmodified="true">
+      <fileset dir="3rdParty/Hardware/zub/${build.platform}/"/>
+    </copy>
+    
+    <!-- copy native DOLI libraries -->
+    <!--<echo message="Deploying DOLI-Dlls ${build.platform}..."/>
+    <copy todir="${dist.dir}/Hardware" overwrite="true" preservelastmodified="true">
+      <fileset dir="3rdParty/Hardware/Doli/${build.platform}/"/>
+    </copy>-->
+    
+    <!-- copy native LmcPci libraries -->
+    <!--<echo message="Deploying LmcPci-Dlls ${build.platform}..."/>
+    <copy todir="${dist.dir}/Hardware" overwrite="true" preservelastmodified="true">
+      <fileset dir="3rdParty/Hardware/LmcPci/${build.platform}/"/>
+    </copy>-->
+    
+    <!-- copy native Pceye libraries -->
+    <!--<echo message="Deploying Pceye-Dlls ${build.platform}..."/>
+    <copy todir="${dist.dir}/Hardware" overwrite="true" preservelastmodified="true">
+      <fileset dir="3rdParty/Hardware/Pceye/${build.platform}/"/>
+    </copy>-->
+    
+    <!-- copy native TWIP libraries -->
+    <echo message="Deploying TWIP-Dlls ${build.platform}..."/>
+    <copy todir="${dist.dir}/Hardware/Twip" overwrite="true" preservelastmodified="true">
+      <fileset dir="3rdParty/Hardware/Twip/${build.platform}/"/>
+    </copy>
+    
+  </target>
+
+  <target name="drawing" depends="init">
+    <devenv action="${build.action}" configuration="${build.configuration}"
+            failondeletecache="${build.failondeletecache}">
+      <fileset dir="Drawing" includes="**/*.sln">
+        <custom classname="com.zoller_d.tools.ant.selectors.PropertySelector">
+          <param name="casesensitive" value="false"/>
+          <param name="prefix" value="build"/>
+          <param name="unless" value="build.all"/>
+        </custom>
+      </fileset>
+    </devenv>
+  </target>
+
+  <target name="zedgraph" depends="init">
+    <devenv action="${build.action}" configuration="${build.configuration}"
+            failondeletecache="${build.failondeletecache}">
+      <fileset dir="ZedGraph" includes="*.sln"/>
+    </devenv>
+  </target>
+
+  <target name="iodevice" depends="sys">
+    <devenv action="${build.action}" configuration="${build.configuration}"
+            failondeletecache="${build.failondeletecache}">
+      <fileset dir="IODevice" includes="**/*.sln">
+        <custom classname="com.zoller_d.tools.ant.selectors.PropertySelector">
+          <param name="casesensitive" value="false"/>
+          <param name="prefix" value="build"/>
+          <param name="unless" value="build.all"/>
+        </custom>
+      </fileset>
+    </devenv>
+  </target>
+
+  <target name="vc" depends="sys">
+    <devenv action="${build.action}" configuration="${build.configuration}" platform="${build.platform}"
+            failondeletecache="${build.failondeletecache}">
+      <fileset dir="Vc" casesensitive="false">
+        <include name="**/*.sln"/>
+        <custom classname="com.zoller_d.tools.ant.selectors.PropertySelector">
+          <param name="casesensitive" value="false"/>
+          <param name="prefix" value="build"/>
+          <param name="unless" value="build.all"/>
+        </custom>
+      </fileset>
+    </devenv>
+  </target>
+
+  <target name="tislib" depends="vc">
+    <devenv action="${build.action}" configuration="${build.configuration}"
+            failondeletecache="${build.failondeletecache}">
+      <fileset dir="Hardware" casesensitive="false">
+        <include name="Grabber/TIS/TISLib/*.sln"/>
+        <custom classname="com.zoller_d.tools.ant.selectors.PropertySelector">
+          <param name="casesensitive" value="false"/>
+          <param name="prefix" value="build"/>
+          <param name="unless" value="build.all"/>
+        </custom>
+      </fileset>
+    </devenv>
+  </target>
+
+  <target name="hardware" depends="vc,tislib, appframeworkbase">
+    <devenv action="${build.action}" configuration="${build.configuration}" platform="${build.platform}"
+            failondeletecache="${build.failondeletecache}">
+      <fileset dir="Hardware" casesensitive="false">
+        <include name="**/*.sln"/>
+        <exclude name="**/Axis_ALL.sln"/>
+        <exclude name="**/Grabber_ALL.sln"/>
+        <exclude name="Grabber/Image/Image.sln"/>
+        <exclude name="Sensor/"/>
+        <exclude name="ManageCaz/ManageCaz.sln"/>
+        <exclude name="Grabber/GrabberCaz/GrabberCaz.sln"/>
+        <exclude name="Grabber/HauppaugeUSBLive2/HauppaugeUSBLive2.sln"/>
+        <exclude name="Grabber/TIS/TISLib/*.sln"/>
+        <exclude name="Axis/Motor/MotorCaz/MotorCaz.sln"/>
+        <exclude name="Axis/Counter/CounterCaz/CounterCaz.sln"/>
+        <custom classname="com.zoller_d.tools.ant.selectors.PropertySelector">
+          <param name="casesensitive" value="false"/>
+          <param name="prefix" value="build"/>
+          <param name="unless" value="build.all"/>
+        </custom>
+      </fileset>
+    </devenv>
+  </target>
+
+  <target name="process" depends="hardware, appframeworkbase">
+    <devenv action="${build.action}" configuration="${build.configuration}" platform="${build.platform}"
+            failondeletecache="${build.failondeletecache}">
+      <!-- Framework und Process ersellen-->
+      <fileset dir="Process" casesensitive="false">
+        <include name="Framework/Framework.sln"/>
+        <include name="Process.sln"/>
+        <custom classname="com.zoller_d.tools.ant.selectors.PropertySelector">
+          <param name="casesensitive" value="false"/>
+          <param name="prefix" value="build"/>
+          <param name="unless" value="build.all"/>
+        </custom>
+      </fileset>
+      <!-- Rest (zb Lasso) ersellen-->
+      <fileset dir="Process" includes="**/*.sln">
+        <exclude name="Framework/Framework.sln"/>
+        <exclude name="Process.sln"/>
+        <custom classname="com.zoller_d.tools.ant.selectors.PropertySelector">
+          <param name="casesensitive" value="false"/>
+          <param name="prefix" value="build"/>
+          <param name="unless" value="build.all"/>
+        </custom>
+      </fileset>
+    </devenv>
+  </target>
+
+  <target name="sensor" depends="process,program">
+    <devenv action="${build.action}" configuration="${build.configuration}"
+            failondeletecache="${build.failondeletecache}">
+      <fileset dir="Hardware/Sensor" casesensitive="false">
+        <include name="**/*.sln"/>
+        <custom classname="com.zoller_d.tools.ant.selectors.PropertySelector">
+          <param name="casesensitive" value="false"/>
+          <param name="prefix" value="build"/>
+          <param name="unless" value="build.all"/>
+        </custom>
+      </fileset>
+    </devenv>
+  </target>
+
+  <target name="caz" depends="appframeworkbase, process, hardware">
+    <devenv action="${build.action}" configuration="${build.configuration}"
+            failondeletecache="${build.failondeletecache}">
+      <fileset dir="Hardware" casesensitive="false">
+        <include name="ManageCaz/ManageCaz.sln"/>
+        <custom classname="com.zoller_d.tools.ant.selectors.PropertySelector">
+          <param name="casesensitive" value="false"/>
+          <param name="prefix" value="build"/>
+          <param name="unless" value="build.all"/>
+        </custom>
+      </fileset>
+      <fileset dir="Hardware" casesensitive="false">
+        <include name="Grabber/GrabberCaz/GrabberCaz.sln"/>
+        <include name="Axis/Motor/MotorCaz/MotorCaz.sln"/>
+        <include name="Axis/Counter/CounterCaz/CounterCaz.sln"/>
+        <custom classname="com.zoller_d.tools.ant.selectors.PropertySelector">
+          <param name="casesensitive" value="false"/>
+          <param name="prefix" value="build"/>
+          <param name="unless" value="build.all"/>
+        </custom>
+      </fileset>
+    </devenv>
+  </target>
+
+  <target name="HauppaugeUSBLive2" depends="hardware">
+    <devenv action="${build.action}" configuration="${build.configuration}"
+            failondeletecache="${build.failondeletecache}">
+      <fileset dir="Hardware/Grabber/HauppaugeUSBLive2" casesensitive="false">
+        <include name="**/*.sln"/>
+        <custom classname="com.zoller_d.tools.ant.selectors.PropertySelector">
+          <param name="casesensitive" value="false"/>
+          <param name="prefix" value="build"/>
+          <param name="unless" value="build.all"/>
+        </custom>
+      </fileset>
+    </devenv>
+  </target>
+
+  <target name="ti" depends="process">
+    <devenv action="${build.action}" configuration="${build.configuration}"
+            failondeletecache="${build.failondeletecache}">
+      <fileset dir="TI/Sys" includes="TISys.sln">
+        <custom classname="com.zoller_d.tools.ant.selectors.PropertySelector">
+          <param name="casesensitive" value="false"/>
+          <param name="prefix" value="build"/>
+          <param name="unless" value="build.all"/>
+        </custom>
+      </fileset>
+      <fileset dir="TI" includes="**/*.sln" excludes="Sys/TISys.sln">
+        <custom classname="com.zoller_d.tools.ant.selectors.PropertySelector">
+          <param name="casesensitive" value="false"/>
+          <param name="prefix" value="build"/>
+          <param name="unless" value="build.all"/>
+        </custom>
+      </fileset>
+    </devenv>
+  </target>
+
+  <target name="IdInvGenerators" depends="sys">
+    <devenv action="${build.action}" configuration="${build.configuration}"
+            failondeletecache="${build.failondeletecache}">
+      <fileset dir="IdInvGenerators" includes="**/*.sln">
+        <custom classname="com.zoller_d.tools.ant.selectors.PropertySelector">
+          <param name="casesensitive" value="false"/>
+          <param name="prefix" value="build"/>
+          <param name="unless" value="build.all"/>
+        </custom>
+      </fileset>
+    </devenv>
+  </target>
+
+  <!--sb, 8011-02-04:  Abhängigkeit caz dazu, damit Sinope nachher kompilierbar-->
+  <target name="program" depends="process,caz">
+    <devenv action="${build.action}" configuration="${build.configuration}"
+            failondeletecache="${build.failondeletecache}">
+      <fileset dir="Program" includes="program.sln" casesensitive="false"/>
+      <fileset dir="Program" includes="*.sln" excludes="program.sln" casesensitive="false">
+        <!--<custom classname="com.zoller_d.tools.ant.selectors.PropertySelector">
+          <param name="casesensitive" value="false"/>
+          <param name="prefix" value="build"/>
+          <param name="unless" value="build.all"/>
+        </custom>-->
+      </fileset>
+      <fileset dir="Program" casesensitive="false">
+        <include name="Sinope/**/*.sln"/>
+        <custom classname="com.zoller_d.tools.ant.selectors.PropertySelector">
+          <param name="casesensitive" value="false"/>
+          <param name="prefix" value="build"/>
+          <param name="unless" value="build.all"/>
+        </custom>
+      </fileset>
+      <fileset dir="Program" casesensitive="false">
+        <include name="**/*.sln"/>
+        <exclude name="*.sln"/>
+        <exclude name="Sinope/**/*.sln"/>
+        <exclude name="Program0630/**/*.sln"/>
+        <exclude name="Program0701/**/*.sln"/>
+        <exclude name="Program0711/**/*.sln"/>
+        <!--<exclude name="Program0900/**/*.sln"/>-->
+        <exclude name="Program0300/**/*.sln"/>
+        <!--<exclude name="Program1500/**/*.sln"/>
+        <exclude name="Program1501/**/*.sln"/>-->
+        <exclude name="Wizard/**/*.sln"/>
+        <exclude name="BaseAralon/AralonAll.sln"/>
+        <custom classname="com.zoller_d.tools.ant.selectors.PropertySelector">
+          <param name="casesensitive" value="false"/>
+          <param name="prefix" value="build"/>
+          <param name="unless" value="build.all"/>
+        </custom>
+      </fileset>
+      <fileset dir="Program" casesensitive="false">
+        <include name="Program0630/*.sln"/>
+        <custom classname="com.zoller_d.tools.ant.selectors.PropertySelector">
+          <param name="casesensitive" value="false"/>
+          <param name="prefix" value="build"/>
+          <param name="unless" value="build.all"/>
+        </custom>
+      </fileset>
+    </devenv>
+  </target>
+
+ 
+
+  <target name="pom" depends="program">
+    <devenv action="${build.action}" configuration="${build.configuration}"
+            failondeletecache="${build.failondeletecache}">
+      <fileset dir="POM" includes="*.sln" casesensitive="false">
+       <custom classname="com.zoller_d.tools.ant.selectors.PropertySelector">
+          <param name="casesensitive" value="false"/>
+          <param name="prefix" value="build"/>
+          <param name="unless" value="build.all"/>
+        </custom>
+     </fileset>
+   </devenv>
+  </target>
+
+  <target name="program0701" depends="program">
+    <devenv action="${build.action}" configuration="${build.configuration}"
+            failondeletecache="${build.failondeletecache}">
+     <fileset dir="Program/Program0701" includes="*.sln" casesensitive="false">
+       <custom classname="com.zoller_d.tools.ant.selectors.PropertySelector">
+          <param name="casesensitive" value="false"/>
+          <param name="prefix" value="build"/>
+          <param name="unless" value="build.all"/>
+        </custom>
+     </fileset>
+     <fileset dir="Program/Program0711" includes="*.sln" casesensitive="false">
+       <custom classname="com.zoller_d.tools.ant.selectors.PropertySelector">
+          <param name="casesensitive" value="false"/>
+          <param name="prefix" value="build"/>
+          <param name="unless" value="build.all"/>
+        </custom>
+     </fileset>
+   </devenv>
+  </target>
+
+  <target name="program0300" depends="modules">
+    <devenv action="${build.action}" configuration="${build.configuration}"
+            failondeletecache="${build.failondeletecache}">
+     <fileset dir="Program/Program0300" includes="*.sln" casesensitive="false">
+       <custom classname="com.zoller_d.tools.ant.selectors.PropertySelector">
+          <param name="casesensitive" value="false"/>
+          <param name="prefix" value="build"/>
+          <param name="unless" value="build.all"/>
+        </custom>
+     </fileset>
+   </devenv>
+  </target>
+
+<!--  <target name="program0900" depends="pom">
+      <devenv action="${build.action}" configuration="${build.configuration}"
+              failondeletecache="${build.failondeletecache}">
+         <fileset dir="Program/Program0900" includes="*.sln" casesensitive="false">
+            <custom classname="com.zoller_d.tools.ant.selectors.PropertySelector">
+               <param name="casesensitive" value="false"/>
+               <param name="prefix" value="build"/>
+               <param name="unless" value="build.all"/>
+            </custom>
+         </fileset>
+      </devenv>
+   </target>-->
+
+<!--  <target name="program1500" depends="PomTopoCam">
+      <devenv action="${build.action}" configuration="${build.configuration}"
+              failondeletecache="${build.failondeletecache}">
+         <fileset dir="Program/program1500" includes="*.sln" casesensitive="false">
+            <custom classname="com.zoller_d.tools.ant.selectors.PropertySelector">
+               <param name="casesensitive" value="false"/>
+               <param name="prefix" value="build"/>
+               <param name="unless" value="build.all"/>
+            </custom>
+         </fileset>
+         <fileset dir="Program/program1501" includes="*.sln" casesensitive="false">
+            <custom classname="com.zoller_d.tools.ant.selectors.PropertySelector">
+               <param name="casesensitive" value="false"/>
+               <param name="prefix" value="build"/>
+               <param name="unless" value="build.all"/>
+            </custom>
+         </fileset>
+      </devenv>
+   </target>-->
+
+   <target name="PomGFM" depends="hardware,pom">
+    <devenv action="${build.action}" configuration="${build.configuration}"
+            failondeletecache="${build.failondeletecache}">
+      <fileset dir="Module" includes="Pom.GFM/Pom.GFM.sln" casesensitive="false">
+       <custom classname="com.zoller_d.tools.ant.selectors.PropertySelector">
+          <param name="casesensitive" value="false"/>
+          <param name="prefix" value="build"/>
+          <param name="unless" value="build.all"/>
+        </custom>
+     </fileset>
+   </devenv>
+  </target>
+
+<!--   <target name="PomTopoCam" depends="hardware,pom">
+    <devenv action="${build.action}" configuration="${build.configuration}"
+            failondeletecache="${build.failondeletecache}">
+      <fileset dir="Module" includes="Pom.TopoCam/Pom.TopoCam.sln" casesensitive="false">
+       <custom classname="com.zoller_d.tools.ant.selectors.PropertySelector">
+          <param name="casesensitive" value="false"/>
+          <param name="prefix" value="build"/>
+          <param name="unless" value="build.all"/>
+        </custom>
+     </fileset>
+   </devenv>
+  </target>-->
+
+  <target name="wizard" depends="program">
+    <devenv action="${build.action}" configuration="${build.configuration}"
+            failondeletecache="${build.failondeletecache}">
+     <fileset dir="Program/Wizard" includes="*.sln" casesensitive="false">
+       <custom classname="com.zoller_d.tools.ant.selectors.PropertySelector">
+          <param name="casesensitive" value="false"/>
+          <param name="prefix" value="build"/>
+          <param name="unless" value="build.all"/>
+        </custom>
+     </fileset>
+   </devenv>
+  </target>
+
+  <target name="externaldata" depends="sys,dnc,drawing,iodevice,program">
+    <devenv action="${build.action}" configuration="${build.configuration}"
+            failonerror="${services.failonerror}"
+            failondeletecache="${build.failondeletecache}">
+      <fileset dir="ExternalData" includes="*.sln">
+        <custom classname="com.zoller_d.tools.ant.selectors.PropertySelector">
+          <param name="casesensitive" value="false"/>
+          <param name="prefix" value="build"/>
+          <param name="unless" value="build.all"/>
+        </custom>
+      </fileset>
+      <fileset dir="ExternalData" includes="**/*.sln" excludes="*.sln">
+        <custom classname="com.zoller_d.tools.ant.selectors.PropertySelector">
+          <param name="casesensitive" value="false"/>
+          <param name="prefix" value="build"/>
+          <param name="unless" value="build.all"/>
+        </custom>
+      </fileset>
+    </devenv>
+  </target>
+
+  <target name="services" depends="sys,dnc,drawing,iodevice,program,pom">
+    <devenv action="${build.action}" configuration="${build.configuration}"
+            failonerror="${services.failonerror}"
+            failondeletecache="${build.failondeletecache}">
+      <fileset dir="Services">
+      <include name="**/*.sln" />
+        <exclude name="MagazinePositionQuery/Siemens840D/"/>
+        <custom classname="com.zoller_d.tools.ant.selectors.PropertySelector">
+          <param name="casesensitive" value="false"/>
+          <param name="prefix" value="build"/>
+          <param name="unless" value="build.all"/>
+        </custom>
+      </fileset>
+      <fileset dir="Services">
+      <include name="MagazinePositionQuery/Siemens840D/"/>
+        <custom classname="com.zoller_d.tools.ant.selectors.PropertySelector">
+          <param name="casesensitive" value="false"/>
+          <param name="prefix" value="build"/>
+          <param name="unless" value="build.all"/>
+        </custom>
+      </fileset>
+    </devenv>
+  </target>
+
+  <target name="modules" depends="sys,dnc,drawing,iodevice,program,ti,IdInvGenerators,externaldata,wizard,pom,sensor,HauppaugeUSBLive2,PomGFM,appscanbase">
+    <devenv action="${build.action}" configuration="${build.configuration}"
+            failonerror="${modules.failonerror}"
+            failondeletecache="${build.failondeletecache}">
+      <fileset dir="Module" includes="Counter/Pisa/Pisa.sln">
+        <custom classname="com.zoller_d.tools.ant.selectors.PropertySelector">
+          <param name="casesensitive" value="false"/>
+          <param name="prefix" value="build"/>
+          <param name="unless" value="build.all"/>
+        </custom>
+      </fileset>
+    </devenv>
+    <devenv action="${build.action}" configuration="${build.configuration}"
+            failonerror="${modules.failonerror}"
+            failondeletecache="${build.failondeletecache}">
+      <fileset dir="Module" includes="Counter/Fkm/Fkm.sln">
+        <custom classname="com.zoller_d.tools.ant.selectors.PropertySelector">
+          <param name="casesensitive" value="false"/>
+          <param name="prefix" value="build"/>
+          <param name="unless" value="build.all"/>
+        </custom>
+      </fileset>
+    </devenv>
+    <devenv action="${build.action}" configuration="${build.configuration}"
+            failonerror="${modules.failonerror}"
+            failondeletecache="${build.failondeletecache}">
+      <fileset dir="Module">
+        <include name="**/*.sln"/>
+        <exclude name="Counter/Pisa/Pisa.sln"/>
+        <exclude name="Counter/Fkm/Fkm.sln"/>
+        <exclude name="ToolScanner/*.sln"/>
+        <!--<exclude name="Edm/*.sln"/>-->
+        <exclude name="Pom.GFM/**/*.sln"/> 
+        <!--<exclude name="Pom.TopoCam/**/*.sln"/>-->
+        <custom classname="com.zoller_d.tools.ant.selectors.PropertySelector">
+          <param name="casesensitive" value="false"/>
+          <param name="prefix" value="build"/>
+          <param name="unless" value="build.all"/>
+        </custom>
+      </fileset>
+    </devenv>
+    <devenv action="${build.action}" configuration="${build.configuration}"
+            failonerror="${modules.failonerror}"
+            failondeletecache="${build.failondeletecache}">
+      <fileset dir="Module" includes="Edm/*.sln">
+        <custom classname="com.zoller_d.tools.ant.selectors.PropertySelector">
+          <param name="casesensitive" value="false"/>
+          <param name="prefix" value="build"/>
+          <param name="unless" value="build.all"/>
+        </custom>
+      </fileset>
+    </devenv>
+  </target>
+
+  <target name="module-toolscanner" depends="sys,dnc,drawing,iodevice,program,ti,IdInvGenerators,externaldata,program0701,program0300">
+    <devenv action="${build.action}" configuration="${build.configuration}"
+            failonerror="${modules.failonerror}"
+            failondeletecache="${build.failondeletecache}">
+     <fileset dir="Module">
+        <include name="ToolScanner/*.sln"/>
+        <custom classname="com.zoller_d.tools.ant.selectors.PropertySelector">
+          <param name="casesensitive" value="false"/>
+          <param name="prefix" value="build"/>
+          <param name="unless" value="build.all"/>
+        </custom>
+      </fileset>
+    </devenv>
+  </target>
+
+  <target name="interfaces" depends="modules" if="folder.interface.present">
+    <devenv action="${build.action}" configuration="${build.configuration}"
+            failonerror="${services.failonerror}"
+            failondeletecache="${build.failondeletecache}">
+      <fileset dir="Interface" includes="**/*.sln">
+        <custom classname="com.zoller_d.tools.ant.selectors.PropertySelector">
+          <param name="casesensitive" value="false"/>
+          <param name="prefix" value="build"/>
+          <param name="unless" value="build.all"/>
+        </custom>
+      </fileset>
+    </devenv>
+  </target>
+
+  <target name="oem" depends="init">
+    <devenv action="${build.action}" configuration="${build.configuration}"
+            failondeletecache="${build.failondeletecache}">
+      <fileset dir="OEM" includes="Zoller.OEM.sln">
+        <custom classname="com.zoller_d.tools.ant.selectors.PropertySelector">
+          <param name="casesensitive" value="false"/>
+          <param name="prefix" value="build"/>
+          <param name="unless" value="build.all"/>
+        </custom>
+      </fileset>
+    </devenv>
+  </target>
+
+  <target name="appframeworkbase" depends="vc">
+    <devenv action="${build.action}" configuration="${build.configuration}" platform="${build.platform}"
+            failondeletecache="${build.failondeletecache}">
+      <fileset dir="AppFramework/AppFrameworkBase" includes="AppFrameworkBase.sln">
+     </fileset>
+   </devenv>
+  </target>
+ 
+
+
+   <target name="appscanbase" depends="init,process,hardware,appframeworkbase">
+      <devenv action="${build.action}" configuration="${build.configuration}" platform="${build.platform}"
+            failondeletecache="${build.failondeletecache}">
+      <fileset dir="AppFramework/AppScanBase" includes="AppScanBase.sln">
+      </fileset>
+      </devenv>
+   </target>
+
+   <target name="pilot" depends="services,modules,interfaces,module-toolscanner,oem,reports"
+          description="Build »pilot 3.0«.">
+    <devenv action="${build.action}" configuration="${build.configuration}" platform="${build.platform}"
+            failondeletecache="${build.failondeletecache}">
+      <fileset dir="Mvis3" includes="Mvis3.sln"/>
+    </devenv>
+  </target>
+
+  <target name="all-compile" depends="pilot, translate-compile, deploy"
+          description="Compile all project targets (short-term for pilot translate-compile deploy).">
+    <echo message="All built!"/>
+  </target>
+
+  <target name="all" depends="pilot, translate, deploy"
+          description="Build all project targets (short-term for pilot translate deploy).">
+    <echo message="All built!"/>
+  </target>
+
+  <!--
+       =========================================================================
+           Cleaning
+       =========================================================================
+  -->
+  <target name="clean-bin-obj" depends="init"
+          description="Clean all VS .NET bin and obj files.">
+    <delete includeemptydirs="true">
+      <fileset dir="." casesensitive="false">
+        <include name="**/bin/${build.configuration}/"/>
+        <include name="**/obj/${build.configuration}/"/>
+        <include name="**/*.suo"/>
+        <include name="**/*.??proj.user"/>
+        <include name="**/*.sln.cache"/>
+        <include name="**/*.ncb"/>
+        <include name="**/*.vcproj.*.*.user"/>
+      </fileset>
+    </delete>
+  </target>
+
+  <target name="distclean" depends="init"
+          description="Clean all target files on the distribution.">
+    <echo message="Searching for non-VCS files..."/>
+    <delete includeemptydirs="true">
+      <fileset dir="${dist.dir}" casesensitive="false">
+        <include name="*/"/>
+        <exclude name="Cfg/License.zoller"/>
+        <exclude name="Settings/"/>
+        <not>
+          <custom classname="com.zoller_d.tools.ant.selectors.CvsSelector"/>
+        </not>
+      </fileset>
+    </delete>
+  </target>
+
+  <target name="clean" depends="clean-bin-obj"
+          description="Clean all build products.">
+    <echo message="All cleaned!"/>
+  </target>
+
+  <!--<target name="cleanall"
+          description="Clean all build products (including ...)">
+    <echo message="Use target clean to clean objects"/>
+    <fail/>
+  </target>-->
+
+  <!--
+       =========================================================================
+           Tools (TODO, VCS, ...)
+       =========================================================================
+  -->
+  <target name="todo" description="Create TODO information from all source files.">
+    <todo file="TODO.xml">
+      <fileset dir=".">
+        <include name="**/*.cs"/>
+        <include name="**/*.xml"/>
+        <exclude name="Output/"/>
+      </fileset>
+    </todo>
+    <style in="TODO.xml"
+         out="TODO.html"
+         style="${todo.xsl.file}">
+      <param name="title" expression="TODO »pilot 3.0«"/>
+      <param name="address" expression="E. Zoller GmbH &amp; Co. KG"/>
+    </style>
+  </target>
+
+  <target name="changelog" depends="init"
+          description="Create the ChangeLog information.">
+    <cvschangelog dir="." destfile="ChangeLog.xml" tag="${changelog.tag}"/>
+    <style in="ChangeLog.xml"
+           out="ChangeLog.html"
+           style="${changelog.xsl.file}">
+      <param name="title" expression="Zoller ChangeLog"/>
+    </style>
+  </target>
+
+  <target name="changelog-with-tag" depends="init"
+          description="Create the ChangeLog information for a specific tag.&lt;br&gt;
+                       Note: Needs changelog.tag, changelog.start and changelog.end properties.">
+    <fail unless="changelog.start" message="Undefined property changelog.start"/>
+    <fail unless="changelog.end" message="Undefined property changelog.end"/>
+
+    <copy tofile="cvs.exe" file="${cvs.file}"/>
+    <cvschangelog dir="." destfile="ChangeLog-${changelog.tag}.xml"
+                  tag="${changelog.tag}"
+                  start="${changelog.start}" end="${changelog.end}"
+    />
+    <delete file="cvs.exe"/>
+    <style in="ChangeLog-${changelog.tag}.xml"
+           out="ChangeLog-${changelog.tag}.html"
+           style="${changelog.xsl.file}">
+      <param name="title"
+             expression="ChangeLog for ${changelog.tag} - ${changelog.start} to ${changelog.end}"
+       />
+    </style>
+  </target>
+
+  <target name="ndoc" description="Create NDoc documentation.">
+    <delete dir="${ndoc.output.dir}"/>
+
+    <ndoc destdir="${ndoc.output.dir}" ndocdir="${ndoc.dir}"
+          documenter="${ndoc.documenter}" helpname="Zoller-Documentation"
+          copyright="E. Zoller GmbH &amp; Co. KG"
+          title="Zoller Class Library Documentation"
+          internals="true">
+      <fileset dir=".">
+        <include name="**/doc/Zoller.*.xml"/>
+      </fileset>
+      <referencepath dir="Output">
+        <include name="Sys"/>
+        <include name="Hardware"/>
+        <include name="Process"/>
+        <include name="Vc"/>
+      </referencepath>
+      <mapper>
+        <chainedmapper>
+          <mapper type="regexp"
+                  from="^(.*)\Q${file.separator}doc${file.separator}\E(Zoller.*)"
+                  to="\1/bin/${build.configuration}/\2"/>
+          <mapper type="glob" from="*.xml" to="*.dll"/>
+        </chainedmapper>
+      </mapper>
+      <includes dir=".">
+        <include name="**/*.png"/>
+        <exclude name="Bmp/"/>
+        <exclude name="Output/"/>
+        <exclude name="${ndoc.output.dir}/**/*.png"/>
+      </includes>
+    </ndoc>
+  </target>
+
+  <target name="ndoc-log4net" description="Create NDoc documentation for log4net.">
+    <ndoc destdir="${ndoc.output.dir}" ndocdir="${ndoc.dir}"
+          documenter="${ndoc.documenter}" helpname="log4net-1.2.10-Documentation"
+          title="log4net 1.2.10.0 SDK Documentation">
+      <fileset dir="." casesensitive="false">
+        <include name="Output/Sys/log4net.dll"/>
+      </fileset>
+    </ndoc>
+  </target>
+
+  <!--
+       =========================================================================
+           Deployment
+       =========================================================================
+  -->
+  <!-- TODO GeneralProperties in zentrales Verzeichnis (Sys/Cfg oder Cfg) kopieren -->
+  <target name="deploy" depends="init"
+          description="Deploy all needed itmes to deploy.dir.">
+    <subant target="deploy">
+      <fileset dir=".">
+        <include name="Sys/build.xml"/>
+        <and>
+          <custom classname="com.zoller_d.tools.ant.selectors.PropertySelector">
+            <param name="casesensitive" value="false"/>
+            <param name="prefix" value="build"/>
+            <param name="unless" value="build.all"/>
+          </custom>
+          <custom classname="com.zoller_d.tools.ant.selectors.PropertySelector">
+            <param name="casesensitive" value="false"/>
+            <param name="prefix" value="deploy"/>
+            <param name="unless" value="deploy.all"/>
+          </custom>
+        </and>
+      </fileset>
+      <property name="build.configuration" value="${build.configuration}"/>
+      <property name="deploy.dir" value="${dist.dir}"/>
+    </subant>
+
+    <subant target="deploy">
+      <fileset dir=".">
+        <include name="**/build.xml"/>
+        <exclude name="build.xml"/>
+        <exclude name="Output/"/>
+      <exclude name="Sys/build.xml"/>
+        <and>
+          <custom classname="com.zoller_d.tools.ant.selectors.PropertySelector">
+            <param name="casesensitive" value="false"/>
+            <param name="prefix" value="build"/>
+            <param name="unless" value="build.all"/>
+          </custom>
+          <custom classname="com.zoller_d.tools.ant.selectors.PropertySelector">
+            <param name="casesensitive" value="false"/>
+            <param name="prefix" value="deploy"/>
+            <param name="unless" value="deploy.all"/>
+          </custom>
+        </and>
+      </fileset>
+      <property name="build.configuration" value="${build.configuration}"/>
+      <property name="deploy.dir" value="${dist.dir}"/>
+    </subant>
+  </target>
+
+  <!--
+       =========================================================================
+           Locale specific tasks.
+       =========================================================================
+  -->
+  <target name="translate" depends="init"
+          description="Generate translation files for all sources.">
+    <subant target="translate">
+      <fileset dir="." includes="**/build.xml" excludes="build.xml">
+        <custom classname="com.zoller_d.tools.ant.selectors.PropertySelector">
+          <param name="casesensitive" value="false"/>
+          <param name="prefix" value="build"/>
+          <param name="unless" value="build.all"/>
+        </custom>
+      </fileset>
+      <property name="translate.locales" value="${translate.locales}"/>
+      <property name="translate.fallback" value="${translate.fallback}"/>
+      <property name="translate.reference" value="${translate.reference}"/>
+      <property name="translate.depends" value="${translate.depends}"/>
+    </subant>
+  </target>
+
+  <target name="translate-compile"
+          description="Compile all language resource files.">
+    <subant target="translate">
+      <fileset dir="." includes="**/build.xml" excludes="build.xml">
+        <custom classname="com.zoller_d.tools.ant.selectors.PropertySelector">
+          <param name="casesensitive" value="false"/>
+          <param name="prefix" value="build"/>
+          <param name="unless" value="build.all"/>
+        </custom>
+      </fileset>
+      <property name="translate.locales" value="${translate.locales}"/>
+      <property name="translate.fallback" value="${translate.fallback}"/>
+      <property name="translate.reference" value="${translate.reference}"/>
+      <property name="translate.depends" value="${translate.depends}"/>
+      <property name="translate.parse" value="false"/>
+      <property name="translate.failonfallback" value="${translate.failonfallback}"/>
+    </subant>
+  </target>
+
+  <target name="translate-clean" description="Clean all language files.">
+    <input message="Do you really want to clean all language files "
+           validargs="yes,n" addproperty="do.translate-clean"
+    />
+    <condition property="do.abort">
+      <equals arg1="n" arg2="${do.translate-clean}"/>
+    </condition>
+    <fail if="do.abort">Build aborted by user.</fail>
+
+    <subant target="translate">
+      <fileset dir="." includes="**/build.xml" excludes="build.xml"/>
+      <property name="translate.locales" value="${translate.locales}"/>
+      <property name="translate.fallback" value="${translate.fallback}"/>
+      <property name="translate.reference" value="${translate.reference}"/>
+      <property name="translate.depends" value="${translate.depends}"/>
+      <property name="translate.clean" value="true"/>
+    </subant>
+  </target>
+
+  <target name="translate-update" description="Updates translated language file from a single directory."
+          depends="translate-update-imp,translate"
+  />
+
+  <target name="translate-update-imp">
+    <fail unless="translate.update.from" message="Undefined property translate.update.from"/>
+    <copyupdate dir="${translate.update.from}" test="${translate.update.test}"
+                verbose="${translate.update.verbose}" >
+      <merger classname="com.zoller_d.tools.ant.filters.ResxMerger">
+          <param name="validate" value="${translate.update.validate}"/>
+          <param name="reference" value="${translate.update.reference}"/>
+          <param name="merge" value="${translate.update.merge}"/>
+      </merger>
+      <fileset dir="." casesensitive="false">
+        <include name="**/resources/*.??.resx"/>
+        <include name="**/resources/*.??-??.resx"/>
+        <exclude name="**/resources/*.de.resx"/>
+      </fileset>
+    </copyupdate>
+  </target>
+
+  <target name="translate-update-recursive"
+          description="Updates language files recursively from one version to the current (e.g. Bugfix to Head)."
+          depends="translate-update-recursive-imp,translate"
+  />
+
+  <target name="translate-update-recursive-imp">
+    <fail unless="translate.update.from" message="Undefined property translate.update.from"/>
+    <copyupdate dir="${translate.update.from}" test="${translate.update.test}"
+                verbose="${translate.update.verbose}" recursive="true" >
+      <merger classname="com.zoller_d.tools.ant.filters.ResxMerger">
+          <param name="ignorechanged" value="true"/>
+          <param name="merge" value="${translate.update.merge}"/>
+      </merger>
+      <fileset dir="." casesensitive="false">
+        <include name="**/resources/*.??.resx"/>
+        <include name="**/resources/*.??-??.resx"/>
+        <!--<exclude name="**/resources/*.de.resx"/>-->
+      </fileset>
+    </copyupdate>
+  </target>
+
+  <target name="translate-package"
+          description="Creates a folder with all needed files for off-house translation.">
+    <input message="Locales (separated by ','):" addproperty="translate.package.locales"/>
+    <input message="Reference locale (separated by ',') [${translate.reference}]:"
+           addproperty="translate.package.reference" defaultvalue="${translate.reference}"/>
+    <input message="Destination folder [translate-${translate.package.locales}]:"
+           addproperty="translate.package.destdir" defaultvalue="translate-${translate.package.locales}"/>
+    <echo>Packaging files for off-house translation...
+      Locales           : ${translate.package.locales}
+      Reference         : ${translate.package.reference}
+      Destination folder: ${translate.package.destdir}
+      Dependencies      : ${translate.package.depends}
+    </echo>
+
+    <copy todir="${translate.package.destdir}">
+      <fileset dir="." casesensitive="false">
+        <include name="**/Resources/*.resx"/>
+        <exclude name="${translate.package.destdir}/"/>
+        <custom classname="com.zoller_d.tools.ant.selectors.TranslateSelector">
+          <param name="reference" value="${translate.package.reference}"/>
+          <param name="locale" value="${translate.package.locales}"/>
+          <param name="depends" value="${translate.package.depends}"/>
+        </custom>
+      </fileset>
+      <mapper type="flatten"/>
+    </copy>
+
+    <!-- Now were are deleting all unneeded reference files. -->
+    <script language="beanshell"><![CDATA[
+      referenceCollection = project.getProperty("translate.package.reference").split(",");
+      referenceLocale = referenceCollection[0];
+      destLocales = project.getProperty("translate.package.locales");
+      destDir = project.getProperty("translate.package.destdir");
+
+      ext = referenceLocale + ".resx";
+      locales = destLocales.split(",");
+
+      // scan for all main reference files
+      fs = project.createDataType("fileset");
+      fs.setDir(new File(destDir));
+      fs.setIncludes("*." + ext);
+      ds = fs.getDirectoryScanner(project);
+
+      srcFiles = ds.getIncludedFiles();
+      for (i = 0, length = srcFiles.length; i < length; i++) {
+          name = srcFiles[i].replaceFirst(ext + "$", "");
+          destExists = false;
+          for (int j = 0; j < locales.length; j++) {
+             destFile = new File(fs.getDir(project), name + locales[j] + ".resx");
+             project.log("Checking: " + destFile, org.apache.tools.ant.Project.MSG_DEBUG);
+             if (destFile.exists()) {
+                 project.log("Exists: " + destFile, org.apache.tools.ant.Project.MSG_DEBUG);
+                 destExists = true;
+                 break;
+             }
+          }
+
+          if (!destExists) {
+              // delete the main reference file
+              file = new File(fs.getDir(project), srcFiles[i]);
+              project.log("Deleting: " + file, org.apache.tools.ant.Project.MSG_VERBOSE);
+              file.delete();
+
+              // delete the rest of the reference collection
+              if (referenceCollection.length > 1) {
+                  for (int i = 1; i < referenceCollection.length; i++) {
+                      f = new File(file.getParent(), file.getName()
+                          .replaceAll("\\." + this.referenceLocale + "\\.",
+                          "." + this.referenceCollection[i] + "."));
+                      project.log("Deleting: " + f, org.apache.tools.ant.Project.MSG_VERBOSE);
+                      f.delete();
+                  }
+              }
+          }
+      }
+    ]]></script>
+
+    <!-- And maybe creating a zip-file ... -->
+    <!--<zip destfile="xx.zip">
+      <fileset dir="xx" includes="*.*"/>
+    </zip>-->
+  </target>
+
+  <!--
+       =========================================================================
+           Assembly information targets
+       =========================================================================
+  -->
+
+  <!-- deletes all assemblyinfo files -->
+  <target name="clean-assemblyinfo-files" depends="init"
+          description="Clean all assemblyinfo.cs  ">
+    <echo message="Searching for assemblyinfo..."/>
+    <delete>
+      <fileset dir=".">
+        <patternset refid="assembly.info.pattern"/>
+        <patternset refid="assembly.info.pattern2"/>
+      </fileset>
+    </delete>
+  </target>
+
+
+
+  <target name="set-assembly-info-version"
+          description="Set the version attribute in AssemblyInfo files.">
+    <fail unless="assembly.info.version" message="Undefined property assembly.info.version!"/>
+
+    <echo message="Setting Version to &quot;${assembly.info.version}&quot;..."/>
+
+    <replaceregexp byline="true">
+    <regexp pattern="(\[\s*assembly\s*:\s*Assembly(?:File)*Version(?:Attribute)*\s*\(&quot;).*(&quot;\)\])"/>
+      <substitution expression="\1${assembly.info.version}\2"/>
+      <fileset dir=".">
+        <patternset refid="assembly.info.pattern"/>
+        <patternset refid="assembly.info.pattern2"/>
+      </fileset>
+   </replaceregexp>
+  </target>
+
+  <target name="set-assembly-file-version"
+          description="Set the version attribute in AssemblyInfo files.">
+    <fail unless="assembly.file.version" message="Undefined property assembly.file.version!"/>
+
+    <echo message="Setting Version to &quot;${assembly.file.version}&quot;..."/>
+
+    <replaceregexp byline="true">
+    <regexp pattern="(\[\s*assembly\s*:\s*AssemblyFileVersion(?:Attribute)*\s*\(&quot;).*(&quot;\)\])"/>
+      <substitution expression=""/>
+      <fileset dir=".">
+        <patternset refid="assembly.info.pattern"/>
+        <patternset refid="assembly.info.pattern2"/>
+      </fileset>
+   </replaceregexp>
+
+   <replaceregexp byline="true">
+      <regexp pattern="(\[\s*assembly\s*:\s*AssemblyVersion(?:Attribute)*\s*\(&quot;).*(&quot;\)\])"/>
+      <substitution expression="\0 \[assembly:AssemblyFileVersion\(&quot;${assembly.file.version}&quot;\)\]"/>
+      <fileset dir=".">
+        <patternset refid="assembly.info.pattern"/>
+        <patternset refid="assembly.info.pattern2"/>
+      </fileset>
+   </replaceregexp>
+  </target>
+
+
+  <target name="set-assembly-main-version"
+          description="Set the version attribute in AssemblyInfo files.">
+    <fail unless="assembly.main.version" message="Undefined property assembly.main.version!"/>
+
+    <echo message="Setting Version to &quot;${assembly.main.version}&quot;..."/>
+
+    <replaceregexp byline="true">
+    <regexp pattern="(\[\s*assembly\s*:\s*AssemblyVersion(?:Attribute)*\s*\(&quot;).*(&quot;\)\])"/>
+      <substitution expression="\1${assembly.main.version}\2"/>
+      <fileset dir=".">
+        <patternset refid="assembly.info.pattern"/>
+        <patternset refid="assembly.info.pattern2"/>
+      </fileset>
+   </replaceregexp>
+  </target>
+
+
+
+  <target name="set-assembly-info-common" depends="set-assembly-info-common2"
+          description="Set all common attributes in AssemblyInfo files.">
+    <fail unless="assembly.info.company" message="Undefined property assembly.info.company!"/>
+
+    <echo message="Setting Company to &quot;${assembly.info.company}&quot;..."/>
+
+    <replaceregexp byline="true">
+      <regexp pattern="(\[\s*assembly\s*:\s*AssemblyCompany(?:Attribute)*\s*\(&quot;).*(&quot;\)\])"/>
+      <substitution expression="\1${assembly.info.company}\2"/>
+      <fileset dir=".">
+        <patternset refid="assembly.info.pattern"/>
+      </fileset>
+    </replaceregexp>
+
+    <echo message="Setting Copyright and Trademark to &quot;(c) ${assembly.info.company}. All rights reserved.&quot;..."/>
+
+    <replaceregexp byline="true">
+      <regexp pattern="(\[\s*assembly\s*:\s*Assembly(?:Copyright)(?:Attribute)*\s*\(&quot;).*(&quot;\)\])"/>
+      <substitution expression="\1\\\\u00a9 ${assembly.info.company}. All rights reserved.\2"/>
+      <fileset dir=".">
+        <patternset refid="assembly.info.pattern"/>
+      </fileset>
+    </replaceregexp>
+    <replaceregexp byline="true">
+      <regexp pattern="(\[\s*assembly\s*:\s*Assembly(?:Trademark)(?:Attribute)*\s*\(&quot;).*(&quot;\)\])"/>
+      <substitution expression="\1\2"/>
+      <fileset dir=".">
+        <patternset refid="assembly.info.pattern"/>
+      </fileset>
+    </replaceregexp>
+  </target>
+
+  <target name="set-assembly-info-common2"
+          description="Set all common attributes in AssemblyInfo files.">
+    <fail unless="assembly.info.company2" message="Undefined property assembly.info.company2!"/>
+
+    <echo message="Setting Company to &quot;${assembly.info.company2}&quot;..."/>
+
+    <replaceregexp byline="true">
+      <regexp pattern="(\[\s*assembly\s*:\s*AssemblyCompany(?:Attribute)*\s*\(&quot;).*(&quot;\)\])"/>
+      <substitution expression="\1${assembly.info.company2}\2"/>
+      <fileset dir=".">
+        <patternset refid="assembly.info.pattern2"/>
+      </fileset>
+    </replaceregexp>
+
+    <echo message="Setting Copyright and Trademark to &quot;(c) ${assembly.info.company2}. All rights reserved.&quot;..."/>
+
+    <replaceregexp byline="true">
+      <regexp pattern="(\[\s*assembly\s*:\s*Assembly(?:Copyright)(?:Attribute)*\s*\(&quot;).*(&quot;\)\])"/>
+      <substitution expression="\1\\\\u00a9 ${assembly.info.company2}. All rights reserved.\2"/>
+      <fileset dir=".">
+        <patternset refid="assembly.info.pattern2"/>
+      </fileset>
+    </replaceregexp>
+    <replaceregexp byline="true">
+      <regexp pattern="(\[\s*assembly\s*:\s*Assembly(?:Trademark)(?:Attribute)*\s*\(&quot;).*(&quot;\)\])"/>
+      <substitution expression="\1\2"/>
+      <fileset dir=".">
+        <patternset refid="assembly.info.pattern2"/>
+      </fileset>
+    </replaceregexp>
+  </target>
+
+  <target name="check-assembly-info"
+          description="Search for AssemblyInfos with AssemblyFileVersion, AssemblyTitle or AssemblyProduct set.">
+
+  <!-- search for AssemblyInfos with AssemblyFileVersion set -->
+    <echo message="Checking for AssemblyInfo files with AssemblyFileVersion set"/>
+  <echo message="Output: AssembliesWithFileVersion.txt"/>
+  <fileset id="FileVersionSetFileset" dir=".">
+    <patternset refid="assembly.info.pattern"/>
+    <containsregexp expression="(\[\s*assembly\s*:\s*AssemblyFileVersion(?:Attribute)*\s*\(&quot;).*(&quot;\)\])"/>
+  </fileset>
+  <pathconvert pathsep="&#xA;" property="FileVersionSetProperty" refid="FileVersionSetFileset">
+    <!--<mapper type="flatten" />-->
+  </pathconvert>
+  <echo file="AssembliesWithFileVersion.txt">${FileVersionSetProperty}</echo>
+  
+  <!-- search for AssemblyInfos with AssemblyTitle set -->
+    <echo message="Checking for AssemblyInfo files with AssemblyTitle set"/>
+  <echo message="Output: AssembliesWithTitle.txt"/>
+  <fileset id="TitleSetFileset" dir=".">
+    <patternset refid="assembly.info.pattern"/>
+    <containsregexp expression="(\[\s*assembly\s*:\s*AssemblyTitle(?:Attribute)*\s*\(&quot;).+(&quot;\)\])"/>
+  </fileset>
+  <pathconvert pathsep="&#xA;" property="TitleSetProperty" refid="TitleSetFileset">
+    <!--<mapper type="flatten" />-->
+  </pathconvert>
+  <echo file="AssembliesWithTitle.txt">${TitleSetProperty}</echo>
+  
+  <!-- search for AssemblyInfos with AssemblyProduct set -->
+    <echo message="Checking for AssemblyInfo files with AssemblyProduct set"/>
+  <echo message="Output: AssembliesWithProduct.txt"/>
+  <fileset id="ProductSetFileset" dir=".">
+    <patternset refid="assembly.info.pattern"/>
+    <containsregexp expression="(\[\s*assembly\s*:\s*AssemblyProduct(?:Attribute)*\s*\(&quot;).+(&quot;\)\])"/>
+  </fileset>
+  <pathconvert pathsep="&#xA;" property="ProductSetProperty" refid="ProductSetFileset">
+    <!--<mapper type="flatten" />-->
+  </pathconvert>
+  <echo file="AssembliesWithProduct.txt">${ProductSetProperty}</echo>
+  </target>
+
+
+  <!--
+       =========================================================================
+           Distribution installation
+       =========================================================================
+  -->
+  <target name="install-sat0" depends="check-sat0-install-dir"
+          description="Install all needed files for sat0 into a separate directory.">
+    <mkdir dir="${sat0.install.dir}/Log"/>
+    <mkdir dir="${sat0.install.dir}/Settings"/>
+
+    <copy todir="${sat0.install.dir}">
+      <fileset dir="Output" casesensitive="false">
+        <include name="CInterface.dll"/>
+        <include name="Pilot.exe"/>
+        <include name="Pilot.exe.config"/>
+        <include name="AppFramework/"/>
+        <include name="Bmp/"/>
+        <include name="Cfg/"/>
+        <include name="Fonts/"/>
+        <include name="Forms/"/>
+        <include name="Hardware/"/>
+        <include name="Module/Adapter/"/>
+        <include name="Module/ControlDedicatedDataOutput/"/>
+        <include name="Module/Counter/"/>
+        <include name="Module/Hardware/"/>
+        <include name="Module/Options/"/>
+        <include name="Module/QualityManagement/"/>
+        <include name="Module/Tool/"/>
+        <include name="Module/ToolAutoMeasure/"/>
+        <include name="Module/User/"/>
+        <include name="Plugins/Devices/**/*File*"/>
+        <include name="Plugins/Devices/**/*V24*"/>
+        <include name="Plugins/Devices/**/*Socket*"/>
+        <include name="Plugins/Post-Processors/"/>
+        <include name="Plugins/Services/**/*DncManager*"/>
+        <include name="Plugins/Services/**/*HardwareSimulation*"/>
+        <include name="Plugins/Services/**/*Print*"/>
+        <include name="Process/"/>
+        <include name="Program/"/>
+        <include name="Report/"/>
+        <include name="Resources/"/>
+        <include name="Sys/"/>
+        <exclude name="Sys/*.xml"/>
+        <include name="Vc/"/>
+        <exclude name="**/ISS/"/>
+      </fileset>
+    </copy>
+  </target>
+
+  <target name="create-sat0-for-setup" depends="install-sat0"
+          description="Install all needed files for sat0 setup program.">
+    <copy todir="${sat0.install.dir}">
+      <fileset dir="Output" casesensitive="false">
+        <include name="Install/"/>
+      </fileset>
+    </copy>
+    <copy todir="${sat0.install.dir}/Hardware" overwrite="true">
+      <fileset dir="Hardware">
+        <include name="Auto/"/>
+        <include name="Demo/"/>
+        <include name="Manual/"/>
+      </fileset>
+    </copy>
+    <copy todir="${sat0.install.dir}/ISS">
+      <fileset dir="." includes="**/ISS/*" casesensitive="false"/>
+      <mapper type="flatten"/>
+    </copy>
+  </target>
+
+  <target name="create-db-logstructure" depends="init">
+    <!--<mkdir dir="${setup.install.dir}/Install/Db/LogStructure"/>
+    <copy todir="${setup.install.dir}/Install/Db/LogStructure" flatten="true">
+      <fileset dir=".">
+        <include name="**/*_DbStructure.xml"/>
+        <exclude name="Output/"/>
+        <exclude name="DbFieldManager/"/>
+        <exclude name="DbQuery"/>
+      </fileset>
+    </copy>-->
+  </target>
+
+  <target name="sign-zoller-binaries" description="Signs binaries for Zoller">
+    <fail unless="sign.cert.thumbprint" message="Undefined property sign.cert.thumbprint!" />
+    <groovy>
+      <![CDATA[
+      import org.apache.tools.ant.util.FileUtils
+      
+      def fs = ant.fileScanner {
+        fileset(dir: new File(properties.'dist.dir'), casesensitive: false) {
+          include(name: '*.exe')
+          include(name: 'Sys/ElevateProcess.exe')
+          include(name: 'Sys/VirtualKeyboard.exe')
+          include(name: '**/Zoller*.dll')
+        }
+      }
+      fs.collect().each { file ->
+        ant.exec(executable: 'signtool', failonerror: true) {
+          arg(value: 'sign')
+          arg(value: '-sha1')
+          arg(value: properties.'sign.cert.thumbprint')
+          arg(value: '-t')
+          arg(value: 'http://timestamp.comodoca.com')
+          arg(value: file)
+        }
+      }
+      ]]>
+    </groovy>
+  </target>
+
+
+  <target name="create-for-setup" depends="check-setup-install-dir, create-db-logstructure"
+          description="Install all needed files for the setup program.">
+    <mkdir dir="${setup.install.dir}/Log"/>
+    <mkdir dir="${setup.install.dir}/Settings"/>
+
+    <copy todir="${setup.install.dir}">
+      <fileset dir="Output" casesensitive="false">
+        <include name="Settings/System/Zoller/Sys/AngleUnit+AngleUnitOptions/Program0312*.xml"/>
+        <include name="Settings/System/Zoller/Sys/LengthUnit+LengthUnitOptions/Program0312*.xml"/>
+      </fileset>
+    </copy>
+  
+    <copy todir="${setup.install.dir}">
+      <fileset dir="Output" casesensitive="false">
+        <exclude name="Cfg/License.zoller"/>
+        <exclude name="Dnc/"/>
+        <exclude name="Install/All/Vc/MvTec/**/*.lib"/>
+        <exclude name="Log/"/>
+        <exclude name="Plugins/Devices/**/*InterfaceTest*"/>
+        <exclude name="Module/Zoller.Module.TestOptions/"/>
+        <exclude name="Module/Zoller.Module.WebBrowser/"/>
+        <exclude name="Settings/"/>
+        <exclude name="Sys/*.xml"/>
+        <exclude name="**/ISS/"/>
+        <exclude name="**/Debug/"/>
+        <exclude name="Plugins/TI/*.xml"/>
+        <exclude name="Plugins/TI/Zoller.TI.TIDevice.Simulation.dll"/>
+        <exclude name="**/*_internal.*"/>
+      </fileset>
+    </copy>
+    <copy todir="${setup.install.dir}/ISS">
+      <fileset dir="." includes="**/ISS/*" casesensitive="false"/>
+      <mapper type="flatten"/>
+    </copy>
+    <copy todir="${setup.install.dir}">
+      <fileset dir="Output" includes="ISS/Base/" casesensitive="false"/>
+    </copy>
+    <copy todir="${setup.install.dir}">
+      <fileset dir="Output" includes="ISS/Base/Pages/" casesensitive="false"/>
+    </copy>
+    <copy todir="${setup.install.dir}">
+      <fileset dir="Output" includes="ISS/Languages/" casesensitive="false"/>
+    </copy>
+    <copy todir="${setup.install.dir}">
+      <fileset dir="Output" includes="ISS/Doc/" casesensitive="false"/>
+    </copy>
+    <copy todir="${setup.install.dir}">
+      <fileset dir="Output" includes="ISS/Syntax/" casesensitive="false"/>
+    </copy>    
+
+    <!--<copy todir="${setup.install.dir}/DB/DbImport">
+      <fileset dir="Output" casesensitive="false">
+        <include name="Sys/AxInterop.SHDocVw.dll"/>
+        <include name="Sys/Interop.SHDocVw.dll"/>
+        <include name="Sys/Interop.SQLDMO.dll"/>
+        <include name="Sys/ICSharpCode.SharpZipLib.dll"/>
+        <include name="Sys/log4net.dll"/>
+        <include name="Sys/Zoller.Sys.dll"/>
+        <include name="Vc/Zoller.Vc.Measure.dll"/>
+        <include name="Vc/resources/*.resources"/>
+        <include name="Process/Zoller.Process.dll"/>
+        <include name="Process/resources/*.resources"/>
+        <include name="Hardware/Zoller.Hardware.Axis.dll"/>
+        <include name="Hardware/Zoller.Hardware.Grabber.dll"/>
+        <include name="Hardware/Zoller.Hardware.Grabber.Utility.dll"/>
+        <include name="Hardware/Zoller.Hardware.Utility.dll"/>
+        <include name="Hardware/resources/*.resources"/>
+      </fileset>
+    </copy>-->
+
+    <!--<copy todir="${setup.install.dir}/DB/DbInstaller">
+      <fileset dir="Output" casesensitive="false">
+        <include name="Sys/AxInterop.SHDocVw.dll"/>
+        <include name="Sys/Interop.SHDocVw.dll"/>
+        <include name="Sys/Interop.SQLDMO.dll"/>
+        <include name="Sys/ICSharpCode.SharpZipLib.dll"/>
+        <include name="Sys/log4net.dll"/>
+        <include name="Sys/Zoller.Sys.dll"/>
+      </fileset>
+    </copy>-->
+
+    <!--<copy todir="${setup.install.dir}/Plugins/Services/bin">
+      <fileset dir="Output/Sys" casesensitive="false">
+        <include name="AxInterop.SHDocVw.dll"/>
+        <include name="Interop.SHDocVw.dll"/>
+        <include name="Interop.SQLDMO.dll"/>
+        <include name="log4net.dll"/>
+        <include name="SerialPort.dll"/>
+        <include name="Zoller.Sys.dll"/>
+        <include name="resources/Zoller.Sys.resources"/>
+      </fileset>
+    </copy>-->
+
+  </target>
+
+  <!--
+       =========================================================================
+           Additional distribution configuration
+       =========================================================================
+  -->
+  <target name="add-sat0" depends="check-sat0-install-dir"
+          description="Add sat0 files to the distribution directory.">
+    <copy todir="${sat0.install.dir}/Hardware" overwrite="true">
+      <fileset dir="Hardware/Manual" includes="*.xml"/>
+    </copy>
+  </target>
+
+  <target name="add-sat1" depends="check-sat0-install-dir"
+          description="Add sat1 files to the distribution directory.">
+    <copy todir="${sat0.install.dir}/Hardware" overwrite="true">
+      <fileset dir="Hardware/Auto" includes="*.xml"/>
+    </copy>
+  </target>
+
+  <target name="add-satdemo" depends="check-sat0-install-dir"
+          description="Add satdemo files to the distribution directory.">
+    <copy todir="${sat0.install.dir}/Hardware" overwrite="true">
+      <fileset dir="Hardware/Demo" includes="*.xml"/>
+    </copy>
+  </target>
+
+  <!--
+       =========================================================================
+           Helper targets
+       =========================================================================
+  -->
+  <target name="check-sat0-install-dir">
+    <fail unless="sat0.install.dir" message="Undefined property sat0.install.dir"/>
+  </target>
+
+  <target name="check-setup-install-dir">
+    <fail unless="setup.install.dir" message="Undefined property setup.install.dir"/>
+  </target>
+
+  <target name="interactive">
+    <interactive>
+      <grouppatternset name="Translate">
+        <include name="translate.*"/>
+      </grouppatternset>
+      <grouppatternset name="NDoc">
+        <include name="ndoc.*"/>
+      </grouppatternset>
+      <grouppatternset name="Setup">
+        <include name=".*for-setup"/>
+      </grouppatternset>
+      <grouppatternset name="Installation">
+      <include name="install.*"/>
+        <include name="add-.*"/>
+      </grouppatternset>
+      <grouppatternset name="Assembly">
+        <include name=".*assembly.*"/>
+      </grouppatternset>
+      <grouppatternset name="Misc">
+        <include name="todo"/>
+        <include name="usage"/>
+        <include name="changelog"/>
+        <include name="changelog-.*"/>
+      </grouppatternset>
+      <property name="assembly.info.company"/>
+      <property name="assembly.info.version"/>
+      <property name="build.action"/>
+      <property name="build.configuration"/>
+      <property name="changelog.tag"/>
+      <property name="changelog.start"/>
+      <property name="changelog.end"/>
+      <property name="setup.install.dir"/>
+      <property name="sat0.install.dir"/>
+      <property name="translate.update.from"/>
+    </interactive>
+  </target>
+
+  <!--
+       =========================================================================
+           Common usage information
+       =========================================================================
+  -->
+  <target name="usage" description="Show usage information.">
+    <echo>
+      <![CDATA[
+      ...
+      ]]>
+    </echo>
+  </target>
+
+</project>

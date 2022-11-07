@@ -1,0 +1,42 @@
+[filter "lfs"]
+	clean = git-lfs clean -- %f
+	smudge = git-lfs smudge -- %f
+	process = git-lfs filter-process
+	required = true
+[user]
+	name = clr-ms2soft
+	email = 53447876+clr-ms2soft@users.noreply.github.com
+[diff] 
+	tool = bc4
+[difftool "bc4"]
+	cmd = \"c:/program files/beyond compare 4/bcomp.exe\" \"$LOCAL\" \"$REMOTE\"
+[merge]
+	tool = bc4
+[mergetool "bc4"]
+	cmd = \"c:/program files/beyond compare 4/bcomp.exe\" \"$LOCAL\" \"$REMOTE\" \"$BASE\" \"$MERGED\"
+	trustExitCode = true
+[alias]
+ bclean = !"f() { git branch --merged ${1-master} | grep -v " ${1-master}$" | xargs -r git branch -d; }; f" && git branch
+    ac = !git add --all . && git commit -am
+    wip = !git status && git ac "wip"
+    wipp = !git status && git ac "wip" && git push
+    com = !git checkout master
+    comp = !git checkout master && git pull
+    fmm = !git fetch && git merge origin/master
+    mm = !git merge origin/master
+    s = !git status
+    dt = !git difftool -d
+    dtm = !git difftool -d master
+    dtl = !git difftool -d head~
+    mt = !git mergetool
+    reset = !git checkout -- .
+    reset-hard = !git reset --hard head
+    undo = !git add . && git stash
+    undo-last-commit = !git reset --hard head~
+    update-stuff = !git comp && git checkout jje-TcdsLocationExporter && git mm && git checkout jje-dontDeleteLocations && git mm && git checkout jje-ests-release-4 && git mm && git checkout jje-import-TcdsVbTesting && git mm && git checkout jje-import-remove-exe && git mm && git com
+    pub = "!f() { git push -u ${1:-origin} `git symbolic-ref HEAD`; }; f"
+    uu = !branch --unset-upstream
+    bap = "!f() { git checkout -b $1; git push --set-upstream origin $1; }; f"
+    d = branch -d
+    D = branch -D
+    co = checkout'
